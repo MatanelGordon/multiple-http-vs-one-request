@@ -1,7 +1,6 @@
 {
   "version": 2,
   "projects": {
-    "backend": "apps/backend",
-    "front": "apps/front"
+    "backend": "apps/backend"
   }
 }
