@@ -1,10 +1,8 @@
 const express = require("express");
 const cors = require("cors");
-const _ = require("lodash");
 const axios = require("axios");
 const bigRequest = require("./bigRequest.json");
-const smallRequest = require("./smallRequest.json");
-const parts = 50;
+const parts = 10;
 
 const app = express();
 const port = process.env.PORT ?? 8000;
@@ -15,10 +13,12 @@ const getFetch = async (url) => {
 };
 
 app.use(cors());
+
 app.use((req, res, next) => {
   console.log(`incoming: ${req.url}`);
   next();
 });
+
 app.get("/all", async (req, res) => {
   const fetches = new Array(parts).fill(0).map((_, i) => {
     const id = i + 1;
@@ -39,10 +39,6 @@ app.get("/partial/:id", (req, res) => {
 
 app.get("/settings", (_, res) => {
   res.json({ parts });
-});
-
-app.get("/small", (req, res) => {
-  res.json(smallRequest);
 });
 
 app.listen(port, () => {

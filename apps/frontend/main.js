@@ -11,6 +11,7 @@ const timePromise = async (promise) => {
 
   return [new Date() - startTime, value];
 };
+
 const fetchJson = async path => {
     const fetched = await fetch(path);
     return fetched.json();
