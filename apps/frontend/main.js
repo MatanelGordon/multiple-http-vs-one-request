@@ -1,97 +1,66 @@
-import './style.css'
+import "./style.css";
+import { addCard, addDivider, addTitle } from "./ui";
 
-const serverRoute = 'http://localhost:8000';
+const serverRoute = "http://localhost:8000";
+
 const url = (path) => new URL(path, serverRoute);
+const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
+const timePromise = async (promise) => {
+  const startTime = new Date();
+  const value = await promise;
 
-const app = document.getElementById('app');
-
-const sleep = ms => new Promise(res => setTimeout(res, ms));
-
-const createCard = (container = app, id = null) => {
-    const node = document.createElement('div');
-    node.classList.add(
-        'pending', 'border-2', 'py-3','px-5', 
-        'font-bold', 'border-cardColor', 'text-cardColor',
-        'text-center', 'rounded-lg', 'w-80'
-    )
-
-    node.textContent = 'Pending...'
-
-    if(id){
-        node.setAttribute('id', id);
-    }
-    
-    container.appendChild(node);
-
-    return {
-        node,
-        successCard: () => {
-            node.classList.remove('pending');
-            node.classList.add('success');
-            node.textContent = 'Success!'
-        },
-        setTime: time => {
-            node.classList.remove('pending');
-            node.classList.add('time');
-            node.textContent = `${+time} [ms]`
-        }
-    }
+  return [new Date() - startTime, value];
+};
+const fetchJson = async path => {
+    const fetched = await fetch(path);
+    return fetched.json();
 }
 
-const createDivider = (container = app) => {
-    const divider = document.createElement('i');
-    divider.classList.add('w-1/2', 'h-0.5', 'bg-gray-500', 'my-5')
-    if(container){
-        container.appendChild(divider);
-    }
-    return divider;
-}
-
-const createTitle = (content, container = app, element = 'h2') => {
-    const header = document.createElement(element);
-    header.textContent = content;
-    container.appendChild(header);
-    return header;
-}
-
-//begining
+const {parts} = await fetchJson(url`/settings`);
 
 //multiple in server
-createTitle('multiple fetches in server')
-const card = createCard();
-
-await sleep(1000)
-
-const startTime1 = new Date();
-await fetch(url`/all`.href).then(card.successCard);
-const time1 = new Date(new Date() - startTime1);
-createCard().setTime(time1)
-
-//divider
-const divider = createDivider();
-
-//multiple in client
-const partsFetch = await fetch(url`/parts`)
-const {parts} = await partsFetch.json()
-
-createTitle(`multiple (${parts}) fetches in client`)
-
-const cards = new Array(parts)
-    .fill(0)
-    .map(() => createCard());
+addTitle("multiple fetches in server");
+const card = addCard();
 
 await sleep(1000);
-const startTime2 = new Date();
-const promises = new Array(parts)
+
+const [time1, value1] = await timePromise(fetchJson(url`/all`.href));
+
+card.successCard();
+addCard().setTime(time1);
+addCard().setText(`length: ${value1.length}`);
+
+//divider
+addDivider();
+
+//multiple in client
+addTitle(`multiple (${parts}) fetches in client`);
+
+const cards = new Array(parts).fill(0).map(() => addCard());
+
+await sleep(500);
+
+const getFromMultipleRoutes = async () => {
+    const promises = new Array(parts)
     .fill(0)
-    .map((_, i) => i + 1)
-    .map(id => url`/partial/${id}`.href)
-    .map((addr, i) => fetch(addr).then(cards[i].successCard))
+    .map((_,i) => {
+        const id = i + 1;
+        const addr = url(`/partial/${id}`).href;
+        return fetchJson(addr);
+    })
 
-await Promise.all(promises);
-const diff2 = new Date(new Date() - startTime2);
-createCard().setTime(diff2);
+    const results = await Promise.all(promises);
+    return results.flat();
+}
 
 
+const [time2, value2] = await timePromise(getFromMultipleRoutes());
 
+cards.forEach(card => {
+    card.successCard();
+});
 
+const length = value2.length;
+
+addCard().setTime(time2);
+addCard().setText(`length: ${length}`)

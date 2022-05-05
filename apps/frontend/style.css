@@ -1,3 +1,7 @@
+html{
+  --clr-success: #06637a;
+}
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -5,4 +9,20 @@
   text-align: center;
   color: #2c3e50;
   margin: 2rem;
+}
+
+.pending{
+  --card-color: hsl(0, 0%, 21%);
+}
+
+.success{
+  --card-color: #28a745;
+}
+
+.time{
+  --card-color: #0e6da8;
+}
+
+.normal{
+  --card-color: #9e5206;
 }
