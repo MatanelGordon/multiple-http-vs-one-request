@@ -7,7 +7,12 @@
     <title>Vite App</title>
     <style>
       html{
-        --clr-success: #1d849e;
+        --clr-success: #06637a;
+      }
+
+      #app{
+        margin: 0;
+        
       }
 
       .pending{
@@ -17,18 +22,15 @@
       .success{
         --card-color: #28a745;
       }
-
+      
+      .time{
+        --card-color: #0e6da8;
+      }
+      
     </style>
   </head>
   <body>
     <main id="app" class="flex justify-center items-center flex-col">
-      <div
-        class="pending fetch-card border-2 py-3 px-5 font-bold border-cardColor rounded-lg w-80"
-        id="fetch_1"
-      >
-        <span class="fetch-card__content text-cardColor">Pending...</span>
-      </div>
-      <i class="w-1/2 h-0.5 bg-gray-500 my-5" ></i>
     </main>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
