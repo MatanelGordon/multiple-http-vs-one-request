@@ -1,8 +1,9 @@
 const express = require("express");
 const cors = require("cors");
+const nocache = require('nocache');
 const axios = require("axios");
 const bigRequest = require("./bigRequest.json");
-const parts = 10;
+const parts = 20;
 
 const app = express();
 const port = process.env.PORT ?? 8000;
@@ -13,11 +14,14 @@ const getFetch = async (url) => {
 };
 
 app.use(cors());
+app.use(nocache());
 
 app.use((req, res, next) => {
   console.log(`incoming: ${req.url}`);
   next();
 });
+
+app.set('Etag', false);
 
 app.get("/all", async (req, res) => {
   const fetches = new Array(parts).fill(0).map((_, i) => {

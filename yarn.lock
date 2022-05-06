@@ -920,6 +920,11 @@ negotiator@0.6.3:
   resolved "https://registry.yarnpkg.com/negotiator/-/negotiator-0.6.3.tgz#58e323a72fedc0d6f9cd4d31fe49f51479590ccd"
   integrity sha512-+EUsqGPLsM+j/zdChZjsnX51g4XrHFOIXwfnCVPGlQk/k5giakcKsuxCObBRu6DSm9opw/O6slWbJdghQM4bBg==
 
+nocache@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/nocache/-/nocache-3.0.3.tgz#07a3f4094746d5211c298d1938dcb5c1e1e352ca"
+  integrity sha512-bd+lPsDTjbfAuKez+xp8xvp15SrQuOjzajRGqRpCAE06FPB1pJzV/QkyBgFD5KOktv/M/A8M0vY7yatnOUaM5Q==
+
 nodemon@^2.0.16:
   version "2.0.16"
   resolved "https://registry.yarnpkg.com/nodemon/-/nodemon-2.0.16.tgz#d71b31bfdb226c25de34afea53486c8ef225fdef"
