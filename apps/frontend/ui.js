@@ -1,6 +1,14 @@
 const app = document.getElementById("app");
 
-export const addCard = (container = app, id = null) => {
+export const addCard = (
+  options = {
+    id: undefined,
+    color: undefined,
+    text: undefined,
+    time: undefined,
+  },
+  container = app
+) => {
   const node = document.createElement("div");
   node.classList.add(
     "pending",
@@ -18,34 +26,56 @@ export const addCard = (container = app, id = null) => {
 
   node.textContent = "Pending...";
 
-  if (id) {
-    node.setAttribute("id", id);
-  }
-
   container.appendChild(node);
 
   const clearCard = () => {
     node.classList.remove("pending", "time", "normal", "success");
   };
 
+  const successCard = () => {
+    clearCard();
+    node.classList.add("success");
+    node.textContent = "Success!";
+  };
+
+  const failCard = () => {
+    clearCard();
+    node.classList.add("failed");
+    node.textContent = "ERROR!";
+  };
+
+  const normalCard = () => {
+    node.classList.add("normal");
+  };
+
+  const setTime = (time) => {
+    clearCard();
+    node.classList.add("time");
+    node.textContent = `${time} [ms]`;
+  };
+
+  const setText = (text) => {
+    node.textContent = text;
+  };
+
+  options.id && node.setAttribute("id", id);
+  options.color === "normal" && normalCard();
+  options.color === "success" && successCard();
+  options.color === "failed" && failedCard();
+  options.text && setText(options.text);
+  options.time && setTime(options.time);
+
   return {
     node,
-    successCard: () => {
-      clearCard();
-      node.classList.add("success");
-      node.textContent = "Success!";
-    },
-    setTime: (time) => {
-      clearCard();
-      node.classList.add("time");
-      node.textContent = `${time} [ms]`;
-    },
-    setText: (text) => {
-      clearCard();
-      node.classList.add("normal");
-      node.textContent = text;
-    },
+    successCard,
+    failCard,
+    normalCard,
     clearCard,
+    setTime,
+    setText,
+    remove: () => {
+      node.remove();
+    },
   };
 };
 
