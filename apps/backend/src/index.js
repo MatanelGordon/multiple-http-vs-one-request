@@ -6,7 +6,7 @@ const createRequestBody = require('./createRequest');
 
 const PARTS = process.env['PARTS'] ?? 30;
 const CHUNK_SIZE = process.env['CHUNK_SIZE'] ?? 5;
-const ENABLE_POLLING = process.env['ENABLE_POLLING'] ?? true;
+const ENABLE_POLLING = process.env['ENABLE_POLLING'] ?? false;
 
 const bigRequest = createRequestBody(PARTS * CHUNK_SIZE);
 
