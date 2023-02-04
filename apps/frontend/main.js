@@ -22,35 +22,40 @@ const fetchJson = async (pathLike) => {
   return fetched.json();
 };
 
-const { parts } = await fetchJson(url`/settings`);
+const { PARTS } = await fetchJson(url`/settings`).catch(() => {
+  const failCard = addCard();
+  failCard.failCard();
+  failCard.setText('Failed to fetch settings');
+});
 
 //multiple in server
 addTitle("multiple fetches in server");
 
-const card = addCard();
+const mainCard = addCard();
 
 await sleep(1000);
 
 const [time1, value1] = await timePromise(fetchJson(url`/all`));
 
-card.successCard();
+mainCard.successCard();
 addCard().setTime(time1);
-addCard().setText(`length: ${value1.length}`);
+addCard({color:'normal'}).setText(`length: ${value1.length}`);
 
 //divider
 addDivider();
 
 //multiple in client
-addTitle(`multiple (${parts}) fetches in client (polling: ${ENABLE_POLLING})`);
+addTitle(`multiple (${PARTS}) fetches in client (polling: ${ENABLE_POLLING})`);
 
-const cards = new Array(parts).fill(0).map(() => addCard());
+const cards = [];
 
 await sleep(500);
 
 const getFromMultipleRoutes = async () => {
-  const promises = new Array(parts).fill(0).map((_, i) => {
+  const promises = new Array(PARTS).fill(0).map((_, i) => {
     const id = i + 1;
     const addr = url(`/partial/${id}`);
+    setTimeout(() => {cards.push(addCard())},0)
     return fetchJson(addr);
   });
 
@@ -58,20 +63,32 @@ const getFromMultipleRoutes = async () => {
   return results.flat();
 };
 
-const getFromMultipleRoutesPolling = async () => {
-    const res = [];
+const getFromMultipleRoutesWithPolling = async () => {
+  const res = [];
 
-    for (let i = 1; i <= parts; i++) {
-        const addr = url(`/partial/${i}`);
-        const json = await fetchJson(addr);
-        res.push(...json);
-    }
+  for (let i = 1; i <= PARTS; i++) {
+    const addr = url(`/partial/${i}`);
+    const json = await fetchJson(addr);
+    setTimeout(() => {cards.push(addCard())},0)
+    res.push(...json);
+  }
 
-    return res;
+  return res;
 };
 
-const getMultiple = ENABLE_POLLING? getFromMultipleRoutesPolling : getFromMultipleRoutes;
-const [time2, value2] = await timePromise(getMultiple());
+const getMultiple = ENABLE_POLLING
+  ? getFromMultipleRoutesWithPolling
+  : getFromMultipleRoutes;
+
+const [time2, value2] = await timePromise(getMultiple()).catch(() => {
+  cards.forEach(card => {
+    card.remove();
+  });
+
+  addCard({color:'failed', text: 'Failed fetching multiple Requests'})
+});
+
+await sleep(100);
 
 cards.forEach((card) => {
   card.successCard();
@@ -80,4 +97,4 @@ cards.forEach((card) => {
 const length = value2.length;
 
 addCard().setTime(time2);
-addCard().setText(`length: ${length}`);
+addCard({color: 'normal'}).setText(`length: ${length}`);
