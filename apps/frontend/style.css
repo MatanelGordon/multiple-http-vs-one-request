@@ -1,3 +1,6 @@
+@tailwind base;
+@tailwind utilities;
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -13,6 +16,10 @@
 
 .success{
   --card-color: #28a745;
+}
+
+.failed{
+  --card-color: #c72929;
 }
 
 .time{
