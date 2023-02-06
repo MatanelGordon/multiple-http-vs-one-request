@@ -6,6 +6,8 @@ const createRequestBody = require('./createRequest');
 
 const PARTS = process.env['PARTS'] ?? 30;
 const CHUNK_SIZE = process.env['CHUNK_SIZE'] ?? 5;
+const ENABLE_POLLING = process.env['ENABLE_POLLING'] ?? false;
+
 const bigRequest = createRequestBody(PARTS * CHUNK_SIZE);
 
 const app = express();
@@ -26,6 +28,10 @@ app.use((req, _, next) => {
 
 app.set('Etag', false);
 
+app.get("/settings", (_, res) => {
+  res.json({ PARTS, CHUNK_SIZE, ENABLE_POLLING });
+});
+
 app.get("/all", async (req, res) => {
   const fetches = new Array(PARTS).fill(0).map((_, i) => {
     const id = i + 1;
@@ -45,9 +51,16 @@ app.get("/partial/:id", (req, res) => {
   res.json(obj);
 });
 
-app.get("/settings", (_, res) => {
-  res.json({ PARTS, CHUNK_SIZE });
-});
+app.get('/chunk/:index', (req, res) => {
+  const {index} = req.params;
+
+  if(!parseInt(index) && parseInt(index) !== 0) { res.status(400).json({message: `invalid index ${index}`, input: index}); return; }
+  const results = bigRequest.slice(+index, +index + CHUNK_SIZE);
+  res.json({
+    results,
+    next: results.length > 0 ? +index + results.length : null
+  })
+})
 
 app.listen(port, () => {
   console.log(`running in port ${port}`);

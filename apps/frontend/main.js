@@ -4,9 +4,11 @@ import { addCard, addDivider, addTitle } from "./ui";
 // configuration
 const PORT = import.meta.env["VITE_PORT"] ?? 8000;
 const SERVER_ROUTE = `http://localhost:${PORT}`;
-const ENABLE_POLLING = false;
 
-const url = (path) => new URL(path, SERVER_ROUTE);
+const defTag = (strings, ...values) =>
+  strings.slice(1).reduce((acc, curr, i) => acc + values[i] + curr, strings[0]);
+
+const url = (...path) => new URL(defTag(...path), SERVER_ROUTE);
 const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
 const timePromise = async (promise) => {
@@ -22,14 +24,13 @@ const fetchJson = async (pathLike) => {
   return fetched.json();
 };
 
-const { PARTS } = await fetchJson(url`/settings`).catch(() => {
+const { PARTS, ENABLE_POLLING } = await fetchJson(url`/settings`).catch(() => {
   const failCard = addCard();
   failCard.failCard();
-  failCard.setText('Failed to fetch settings');
+  failCard.setText("Failed to fetch settings");
 });
 
-//multiple in server
-addTitle("multiple fetches in server");
+addTitle("Single Fetch From Server");
 
 const mainCard = addCard();
 
@@ -39,7 +40,7 @@ const [time1, value1] = await timePromise(fetchJson(url`/all`));
 
 mainCard.successCard();
 addCard().setTime(time1);
-addCard({color:'normal'}).setText(`length: ${value1.length}`);
+addCard({ color: "normal" }).setText(`length: ${value1.length}`);
 
 //divider
 addDivider();
@@ -54,8 +55,10 @@ await sleep(500);
 const getFromMultipleRoutes = async () => {
   const promises = new Array(PARTS).fill(0).map((_, i) => {
     const id = i + 1;
-    const addr = url(`/partial/${id}`);
-    setTimeout(() => {cards.push(addCard())},0)
+    const addr = url`/partial/${id}`;
+    setTimeout(() => {
+      cards.push(addCard());
+    }, 0);
     return fetchJson(addr);
   });
 
@@ -65,13 +68,16 @@ const getFromMultipleRoutes = async () => {
 
 const getFromMultipleRoutesWithPolling = async () => {
   const res = [];
+  let nextId = 0;
 
-  for (let i = 1; i <= PARTS; i++) {
-    const addr = url(`/partial/${i}`);
-    const json = await fetchJson(addr);
-    setTimeout(() => {cards.push(addCard())},0)
-    res.push(...json);
-  }
+  do {
+    const { results, next } = await fetchJson(url`/chunk/${nextId}`);
+    setTimeout(() => {
+      cards.push(addCard({color: 'success'}));
+    }, 0);
+    res.push(...results);
+    nextId = next;
+  } while (nextId);
 
   return res;
 };
@@ -80,21 +86,22 @@ const getMultiple = ENABLE_POLLING
   ? getFromMultipleRoutesWithPolling
   : getFromMultipleRoutes;
 
-const [time2, value2] = await timePromise(getMultiple()).catch(() => {
-  cards.forEach(card => {
+const [time2, value2] = await timePromise(getMultiple()).catch((e) => {
+  cards.forEach((card) => {
     card.remove();
   });
 
-  addCard({color:'failed', text: 'Failed fetching multiple Requests'})
+  addCard({ color: "failed", text: e.message });
 });
+
+// success all cards in non-polling mode after fetch
+if(!ENABLE_POLLING){
+  cards.forEach(card => card.successCard());
+}
 
 await sleep(100);
-
-cards.forEach((card) => {
-  card.successCard();
-});
 
 const length = value2.length;
 
 addCard().setTime(time2);
-addCard({color: 'normal'}).setText(`length: ${length}`);
+addCard({ color: "normal" }).setText(`length: ${length}`);
