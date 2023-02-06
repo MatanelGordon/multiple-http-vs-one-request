@@ -87,12 +87,12 @@ const getMultiple = ENABLE_POLLING
   ? getFromMultipleRoutesWithPolling
   : getFromMultipleRoutes;
 
-const [time2, value2] = await timePromise(getMultiple()).catch(() => {
+const [time2, value2] = await timePromise(getMultiple()).catch((e) => {
   cards.forEach((card) => {
     card.remove();
   });
 
-  addCard({ color: "failed", text: "Failed fetching multiple Requests" });
+  addCard({ color: "failed", text: e.message });
 });
 
 await sleep(100);
